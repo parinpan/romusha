@@ -84,7 +84,6 @@ go.work
 # .idea/modules.xml
 # .idea/*.iml
 # .idea/modules
-# *.iml
 # *.ipr
 
 # CMake
@@ -166,3 +165,4 @@ Temporary Items
 *.icloud
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,go,git,macos
+/*.iml

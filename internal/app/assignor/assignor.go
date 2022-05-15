@@ -2,14 +2,9 @@ package assignor
 
 import (
 	"context"
-	"errors"
 
 	"github.com/parinpan/romusha/bridge"
 	"github.com/parinpan/romusha/internal/app/participant"
-)
-
-var (
-	ErrAssignError = errors.New("failed to assign worker")
 )
 
 type participantClient interface {
@@ -48,7 +43,7 @@ func (a *Assignor) assign(ctx context.Context, job []byte) error {
 	}
 
 	if response.State != bridge.State_SUCCESS {
-		return ErrAssignError
+		return a.pushBack(ctx, job)
 	}
 
 	return nil
