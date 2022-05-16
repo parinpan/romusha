@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "romusha/definition";
+
+package participant;
+
+message Member {
+  string host = 1;
+}
+
+enum Topic {
+  Call = 0;
+  Join = 1;
+  Busy = 2;
+  Fault = 3;
+}
+
+enum Status {
+  Unknown = 0;
+  Available = 1;
+  Occupied = 2;
+}

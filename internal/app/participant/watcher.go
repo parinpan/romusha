@@ -15,7 +15,7 @@ func AddParticipant(participator participator) Watcher {
 	var member Member
 
 	return func(ctx context.Context, state StateBody) error {
-		if state.Topic != Ack {
+		if state.Topic != Join {
 			return nil
 		}
 

@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	Sync  Topic = "sync"
-	Ack   Topic = "ack"
+	Call  Topic = "call"
+	Join  Topic = "join"
 	Busy  Topic = "busy"
 	Fault Topic = "fault"
 )

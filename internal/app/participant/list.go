@@ -3,36 +3,30 @@ package participant
 import (
 	"context"
 	"sync"
+
+	"github.com/parinpan/romusha/definition"
 )
 
 var (
 	mutex = &sync.Mutex{}
 )
 
-type Host string
-type Endpoint string
-type List map[Host]Endpoint
+type List map[string]struct{}
 
 func (l List) GetAll(_ context.Context) List {
 	return l
 }
 
-func (l List) GetEndpoint(_ context.Context, host Host) Endpoint {
+func (l List) Add(_ context.Context, member definition.Member) (err error) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	return l[host]
-}
-
-func (l List) Add(_ context.Context, member Member) (err error) {
-	mutex.Lock()
-	defer mutex.Unlock()
-	l[Host(member.Host)] = Endpoint(member.Endpoint)
+	l[member.Host] = struct{}{}
 	return
 }
 
-func (l List) Remove(_ context.Context, member Member) (err error) {
+func (l List) Remove(_ context.Context, member definition.Member) (err error) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	delete(l, Host(member.Host))
+	delete(l, member.Host)
 	return
 }

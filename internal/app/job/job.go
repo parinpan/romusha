@@ -8,24 +8,18 @@ import (
 
 type Processor func(ctx context.Context, filePaths []string) error
 
-type Job struct {
-	ID        string
-	FilePaths []string
-	Processor Processor
-}
-
-func Encode(job Job) ([]byte, error) {
+func Encode[T](data *T) ([]byte, error) {
 	var buffer bytes.Buffer
 	var encoder = gob.NewEncoder(&buffer)
 
-	if err := encoder.Encode(job); err != nil {
+	if err := encoder.Encode(data); err != nil {
 		return nil, err
 	}
 
 	return buffer.Bytes(), nil
 }
 
-func Decode(job []byte, result *Job) error {
+func Decode[T](job []byte, result *T) error {
 	var buffer = bytes.NewBuffer(job)
 	var decoder = gob.NewDecoder(buffer)
 	return decoder.Decode(result)
