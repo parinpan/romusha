@@ -21,73 +21,18 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Type int32
-
-const (
-	Type_Unknown  Type = 0
-	Type_Generic  Type = 1
-	Type_Mapper   Type = 2
-	Type_Reducer  Type = 3
-	Type_Combiner Type = 4
-)
-
-// Enum value maps for Type.
-var (
-	Type_name = map[int32]string{
-		0: "Unknown",
-		1: "Generic",
-		2: "Mapper",
-		3: "Reducer",
-		4: "Combiner",
-	}
-	Type_value = map[string]int32{
-		"Unknown":  0,
-		"Generic":  1,
-		"Mapper":   2,
-		"Reducer":  3,
-		"Combiner": 4,
-	}
-)
-
-func (x Type) Enum() *Type {
-	p := new(Type)
-	*p = x
-	return p
-}
-
-func (x Type) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_definition_proto_job_proto_enumTypes[0].Descriptor()
-}
-
-func (Type) Type() protoreflect.EnumType {
-	return &file_definition_proto_job_proto_enumTypes[0]
-}
-
-func (x Type) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use Type.Descriptor instead.
-func (Type) EnumDescriptor() ([]byte, []int) {
-	return file_definition_proto_job_proto_rawDescGZIP(), []int{0}
-}
-
-type Job struct {
+type JobEnvelope struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type    Type     `protobuf:"varint,1,opt,name=type,proto3,enum=job.Type" json:"type,omitempty"`
-	Sources []string `protobuf:"bytes,2,rep,name=sources,proto3" json:"sources,omitempty"`
-	Processor []byte   `protobuf:"bytes,3,opt,name=processor,proto3" json:"processor,omitempty"`
+	ID       string      `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	Request  *JobRequest `protobuf:"bytes,2,opt,name=request,proto3" json:"request,omitempty"`
+	Executor []byte      `protobuf:"bytes,3,opt,name=executor,proto3" json:"executor,omitempty"`
 }
 
-func (x *Job) Reset() {
-	*x = Job{}
+func (x *JobEnvelope) Reset() {
+	*x = JobEnvelope{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_definition_proto_job_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -95,13 +40,13 @@ func (x *Job) Reset() {
 	}
 }
 
-func (x *Job) String() string {
+func (x *JobEnvelope) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Job) ProtoMessage() {}
+func (*JobEnvelope) ProtoMessage() {}
 
-func (x *Job) ProtoReflect() protoreflect.Message {
+func (x *JobEnvelope) ProtoReflect() protoreflect.Message {
 	mi := &file_definition_proto_job_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -113,44 +58,43 @@ func (x *Job) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Job.ProtoReflect.Descriptor instead.
-func (*Job) Descriptor() ([]byte, []int) {
+// Deprecated: Use JobEnvelope.ProtoReflect.Descriptor instead.
+func (*JobEnvelope) Descriptor() ([]byte, []int) {
 	return file_definition_proto_job_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Job) GetType() Type {
+func (x *JobEnvelope) GetID() string {
 	if x != nil {
-		return x.Type
+		return x.ID
 	}
-	return Type_Unknown
+	return ""
 }
 
-func (x *Job) GetSources() []string {
+func (x *JobEnvelope) GetRequest() *JobRequest {
 	if x != nil {
-		return x.Sources
-	}
-	return nil
-}
-
-func (x *Job) GetProcessor() []byte {
-	if x != nil {
-		return x.Processor
+		return x.Request
 	}
 	return nil
 }
 
-type Envelope struct {
+func (x *JobEnvelope) GetExecutor() []byte {
+	if x != nil {
+		return x.Executor
+	}
+	return nil
+}
+
+type JobRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ID               string `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
-	CallbackEndpoint string `protobuf:"bytes,2,opt,name=callback_endpoint,json=callbackEndpoint,proto3" json:"callback_endpoint,omitempty"`
-	Job              []byte `protobuf:"bytes,3,opt,name=job,proto3" json:"job,omitempty"`
+	Source      string `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	CallbackUrl string `protobuf:"bytes,2,opt,name=callback_url,json=callbackUrl,proto3" json:"callback_url,omitempty"`
 }
 
-func (x *Envelope) Reset() {
-	*x = Envelope{}
+func (x *JobRequest) Reset() {
+	*x = JobRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_definition_proto_job_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -158,13 +102,13 @@ func (x *Envelope) Reset() {
 	}
 }
 
-func (x *Envelope) String() string {
+func (x *JobRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Envelope) ProtoMessage() {}
+func (*JobRequest) ProtoMessage() {}
 
-func (x *Envelope) ProtoReflect() protoreflect.Message {
+func (x *JobRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_definition_proto_job_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -176,30 +120,23 @@ func (x *Envelope) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Envelope.ProtoReflect.Descriptor instead.
-func (*Envelope) Descriptor() ([]byte, []int) {
+// Deprecated: Use JobRequest.ProtoReflect.Descriptor instead.
+func (*JobRequest) Descriptor() ([]byte, []int) {
 	return file_definition_proto_job_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Envelope) GetID() string {
+func (x *JobRequest) GetSource() string {
 	if x != nil {
-		return x.ID
+		return x.Source
 	}
 	return ""
 }
 
-func (x *Envelope) GetCallbackEndpoint() string {
+func (x *JobRequest) GetCallbackUrl() string {
 	if x != nil {
-		return x.CallbackEndpoint
+		return x.CallbackUrl
 	}
 	return ""
-}
-
-func (x *Envelope) GetJob() []byte {
-	if x != nil {
-		return x.Job
-	}
-	return nil
 }
 
 var File_definition_proto_job_proto protoreflect.FileDescriptor
@@ -207,25 +144,19 @@ var File_definition_proto_job_proto protoreflect.FileDescriptor
 var file_definition_proto_job_proto_rawDesc = []byte{
 	0x0a, 0x1a, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x2f, 0x6a, 0x6f, 0x62, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x03, 0x6a, 0x6f,
-	0x62, 0x22, 0x5c, 0x0a, 0x03, 0x4a, 0x6f, 0x62, 0x12, 0x1d, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x09, 0x2e, 0x6a, 0x6f, 0x62, 0x2e, 0x54, 0x79, 0x70,
-	0x65, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x6f, 0x75, 0x72, 0x63,
-	0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x07, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
-	0x73, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x0c, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x22,
-	0x59, 0x0a, 0x08, 0x45, 0x6e, 0x76, 0x65, 0x6c, 0x6f, 0x70, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x49,
-	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x44, 0x12, 0x2b, 0x0a, 0x11, 0x63,
-	0x61, 0x6c, 0x6c, 0x62, 0x61, 0x63, 0x6b, 0x5f, 0x65, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x63, 0x61, 0x6c, 0x6c, 0x62, 0x61, 0x63, 0x6b,
-	0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6a, 0x6f, 0x62, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x03, 0x6a, 0x6f, 0x62, 0x2a, 0x47, 0x0a, 0x04, 0x54, 0x79,
-	0x70, 0x65, 0x12, 0x0b, 0x0a, 0x07, 0x55, 0x6e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x10, 0x00, 0x12,
-	0x0b, 0x0a, 0x07, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x69, 0x63, 0x10, 0x01, 0x12, 0x0a, 0x0a, 0x06,
-	0x4d, 0x61, 0x70, 0x70, 0x65, 0x72, 0x10, 0x02, 0x12, 0x0b, 0x0a, 0x07, 0x52, 0x65, 0x64, 0x75,
-	0x63, 0x65, 0x72, 0x10, 0x03, 0x12, 0x0c, 0x0a, 0x08, 0x43, 0x6f, 0x6d, 0x62, 0x69, 0x6e, 0x65,
-	0x72, 0x10, 0x04, 0x42, 0x14, 0x5a, 0x12, 0x72, 0x6f, 0x6d, 0x75, 0x73, 0x68, 0x61, 0x2f, 0x64,
-	0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x62, 0x22, 0x64, 0x0a, 0x0b, 0x4a, 0x6f, 0x62, 0x45, 0x6e, 0x76, 0x65, 0x6c, 0x6f, 0x70, 0x65,
+	0x12, 0x0e, 0x0a, 0x02, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x44,
+	0x12, 0x29, 0x0a, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x0f, 0x2e, 0x6a, 0x6f, 0x62, 0x2e, 0x4a, 0x6f, 0x62, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x52, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x65,
+	0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x08, 0x65,
+	0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x22, 0x47, 0x0a, 0x0a, 0x4a, 0x6f, 0x62, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x21, 0x0a,
+	0x0c, 0x63, 0x61, 0x6c, 0x6c, 0x62, 0x61, 0x63, 0x6b, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x61, 0x6c, 0x6c, 0x62, 0x61, 0x63, 0x6b, 0x55, 0x72, 0x6c,
+	0x42, 0x14, 0x5a, 0x12, 0x72, 0x6f, 0x6d, 0x75, 0x73, 0x68, 0x61, 0x2f, 0x64, 0x65, 0x66, 0x69,
+	0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -240,15 +171,13 @@ func file_definition_proto_job_proto_rawDescGZIP() []byte {
 	return file_definition_proto_job_proto_rawDescData
 }
 
-var file_definition_proto_job_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_definition_proto_job_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_definition_proto_job_proto_goTypes = []interface{}{
-	(Type)(0),        // 0: job.Type
-	(*Job)(nil),      // 1: job.Job
-	(*Envelope)(nil), // 2: job.Envelope
+	(*JobEnvelope)(nil), // 0: job.JobEnvelope
+	(*JobRequest)(nil),  // 1: job.JobRequest
 }
 var file_definition_proto_job_proto_depIdxs = []int32{
-	0, // 0: job.Job.type:type_name -> job.Type
+	1, // 0: job.JobEnvelope.request:type_name -> job.JobRequest
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -263,7 +192,7 @@ func file_definition_proto_job_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_definition_proto_job_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Job); i {
+			switch v := v.(*JobEnvelope); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -275,7 +204,7 @@ func file_definition_proto_job_proto_init() {
 			}
 		}
 		file_definition_proto_job_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Envelope); i {
+			switch v := v.(*JobRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -292,14 +221,13 @@ func file_definition_proto_job_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_definition_proto_job_proto_rawDesc,
-			NumEnums:      1,
+			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_definition_proto_job_proto_goTypes,
 		DependencyIndexes: file_definition_proto_job_proto_depIdxs,
-		EnumInfos:         file_definition_proto_job_proto_enumTypes,
 		MessageInfos:      file_definition_proto_job_proto_msgTypes,
 	}.Build()
 	File_definition_proto_job_proto = out.File

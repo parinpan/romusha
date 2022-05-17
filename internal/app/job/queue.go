@@ -2,14 +2,13 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 )
 
 const (
-	jobKeyFormat = "job:queue:%s"
+	queueKey = "job:queue"
 )
 
 type QueueProcessor func(ctx context.Context, job []byte) error
@@ -24,15 +23,15 @@ type Queue struct {
 	qc  queueClient
 }
 
-func NewQueue(key string, qc queueClient) *Queue {
+func NewQueue(qc queueClient) *Queue {
 	return &Queue{
-		key: jobKey(key),
+		key: queueKey,
 		qc:  qc,
 	}
 }
 
-func (q *Queue) Push(ctx context.Context, goBytes []byte) error {
-	return q.qc.RPush(ctx, q.key, goBytes).Err()
+func (q *Queue) Push(ctx context.Context, jobEnvelope []byte) error {
+	return q.qc.RPush(ctx, q.key, jobEnvelope).Err()
 }
 
 func (q *Queue) Poll(ctx context.Context, timeout time.Duration, processor QueueProcessor) error {
@@ -48,8 +47,4 @@ func (q *Queue) Poll(ctx context.Context, timeout time.Duration, processor Queue
 
 		time.Sleep(timeout)
 	}
-}
-
-func jobKey(queueKey string) string {
-	return fmt.Sprintf(jobKeyFormat, queueKey)
 }

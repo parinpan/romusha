@@ -4,22 +4,13 @@ option go_package = "romusha/definition";
 
 package job;
 
-message Job {
-  Type type = 1;
-  string source = 2;
-  bytes processor = 3;
-}
-
-message Envelope {
+message JobEnvelope {
   string ID = 1;
-  string callback_endpoint = 2;
-  bytes job = 3;
+  JobRequest request = 2;
+  bytes executor = 3;
 }
 
-enum Type {
-  Unknown = 0;
-  Generic = 1;
-  Mapper = 2;
-  Reducer = 3;
-  Combiner = 4;
+message JobRequest {
+  string source = 1;
+  string callback_url = 2;
 }

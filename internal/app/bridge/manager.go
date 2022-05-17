@@ -12,14 +12,14 @@ var (
 )
 
 type bridger interface {
-	Assign(ctx context.Context, envelope *definition.Envelope) (resp *definition.Response, err error)
+	Assign(ctx context.Context, envelope *definition.JobEnvelope) (resp *definition.Response, err error)
 }
 
 type Manager struct {
 	bridger map[string]bridger
 }
 
-func (m *Manager) AssignByHost(ctx context.Context, host string, envelope *definition.Envelope) (resp *definition.Response, err error) {
+func (m *Manager) AssignByHost(ctx context.Context, host string, envelope *definition.JobEnvelope) (resp *definition.Response, err error) {
 	bridger, err := m.getBridger(host)
 	if err != nil {
 		return nil, ErrNoBridger

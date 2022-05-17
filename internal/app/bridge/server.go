@@ -16,7 +16,7 @@ type Server struct {
 	status  definition.Status
 }
 
-func (s *Server) Assign(ctx context.Context, envelope *definition.Envelope) (resp *definition.Response, err error) {
+func (s *Server) Assign(ctx context.Context, envelope *definition.JobEnvelope) (resp *definition.Response, err error) {
 	resp.Message = *proto.String("machine is available")
 	resp.Status = definition.BridgeStatus_Success
 
@@ -29,24 +29,16 @@ func (s *Server) Assign(ctx context.Context, envelope *definition.Envelope) (res
 	// set worker as occupied because it's about to use
 	s.status = definition.Status_Occupied
 
-	var dispatchedJob definition.Job
-	var jobProcessor job.Processor
+	var exec definition.Executor
 
-	if err = job.Decode[definition.Job](envelope.Job, &dispatchedJob); err != nil {
-		s.status = definition.Status_Available
-		resp.Message = *proto.String("machine can't decode job")
-		resp.Status = definition.BridgeStatus_Error
-		return
-	}
-
-	if err = job.Decode[job.Processor](dispatchedJob.Processor, &jobProcessor); err != nil {
+	if err = job.Decode(envelope.Executor, &exec); err != nil {
 		s.status = definition.Status_Available
 		resp.Message = *proto.String("machine can't decode job processor")
 		resp.Status = definition.BridgeStatus_Error
 		return
 	}
 
-	go s.tracker.Track(ctx, envelope, &s.status, &dispatchedJob, jobProcessor)
+	go s.tracker.Track(ctx, envelope, exec, &s.status)
 
 	return
 }

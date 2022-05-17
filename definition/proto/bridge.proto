@@ -7,7 +7,7 @@ package bridge;
 import "definition/proto/job.proto";
 
 service Bridge {
-  rpc Assign(job.Envelope) returns (Response) {}
+  rpc Assign(job.JobEnvelope) returns (Response) {}
 }
 
 enum BridgeStatus {
