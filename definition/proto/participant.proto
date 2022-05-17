@@ -12,7 +12,8 @@ enum Topic {
   Call = 0;
   Join = 1;
   Busy = 2;
-  Fault = 3;
+  BroadcastFailure = 3;
+  BroadcastSuccess = 4;
 }
 
 enum Status {

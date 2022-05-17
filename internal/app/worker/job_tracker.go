@@ -15,82 +15,51 @@ type participator interface {
 }
 
 type JobTracker struct {
-	member      []byte
+	member      *definition.Member
 	participant participator
 }
 
-func NewJobTracker(participant participator, member participant.Member) (*JobTracker, error) {
-	b, err := json.Marshal(member)
-	if err != nil {
-		return nil, err
-	}
-
+func NewJobTracker(participant participator, member *definition.Member) *JobTracker {
 	return &JobTracker{
-		member:      b,
+		member:      member,
 		participant: participant,
-	}, nil
+	}
 }
 
 func (t *JobTracker) Track(
 	ctx context.Context,
 	envelope *definition.Envelope,
-	status *participant.Status, job *definition.Job, processor job.Processor) {
+	status *definition.Status, job *definition.Job, processor job.Processor) {
 
-	t.notifyBusy(ctx)
+	notify[*definition.Member](ctx, t.participant, definition.Topic_Busy, t.member)
 
 	defer func() {
-		*status = participant.Available
-		t.notifyJoin(ctx)
+		*status = definition.Status_Available
+		notify[*definition.Member](ctx, t.participant, definition.Topic_Join, t.member)
 	}()
 
 	if err := processor(ctx, job.Sources); err != nil {
-		t.notifyJob(ctx, definition.Topic_Fault, envelope)
+		notify[*definition.Envelope](ctx, t.participant, definition.Topic_BroadcastFailure, envelope)
 		return
 	}
 
-	t.notifyJob(ctx, definition.Topic_Fault, envelope)
+	notify[*definition.Envelope](ctx, t.participant, definition.Topic_BroadcastSuccess, envelope)
 }
 
-func (t *JobTracker) notifyBusy(ctx context.Context) {
+func notify[T](ctx context.Context, participator participator, topic definition.Topic, data T) {
 	go func() {
-		sb := participant.StateBody{
-			Topic: participant.Busy,
-			Data:  []byte(nil),
-		}
-
-		if err := t.participant.Notify(ctx, sb); err != nil {
-			log.Printf("notify-busy with error: %#v", err)
-		}
-	}()
-}
-
-func (t *JobTracker) notifyJoin(ctx context.Context) {
-	go func() {
-		sb := participant.StateBody{
-			Topic: participant.Join,
-			Data:  t.member,
-		}
-
-		if err := t.participant.Notify(ctx, sb); err != nil {
-			log.Printf("notify-join with error: %#v", err)
-		}
-	}()
-}
-
-func (t *JobTracker) notifyJob(ctx context.Context, topic definition.Topic, envelope *definition.Envelope) {
-	go func() {
-		b, err := job.Encode[definition.Envelope](envelope)
+		b, err := json.Marshal(data)
 		if err != nil {
-			return
+			log.Printf("notify %s with error: %#v", topic, err)
 		}
 
-		sb := participant.StateBody{
-			Topic: participant.Topic(topic.String()),
+		stateBody := participant.StateBody{
+			Topic: topic,
 			Data:  b,
 		}
 
-		if err := t.participant.Notify(ctx, sb); err != nil {
-			log.Printf("notify-fault with error: %#v", err)
+		if err := participator.Notify(ctx, stateBody); err != nil {
+			log.Printf("notify %s with error: %#v", topic, err)
 		}
 	}()
 }

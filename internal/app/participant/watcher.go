@@ -3,6 +3,8 @@ package participant
 import (
 	"context"
 	"encoding/json"
+
+	"github.com/parinpan/romusha/definition"
 )
 
 type Watcher func(ctx context.Context, state StateBody) error
@@ -12,10 +14,10 @@ type participator interface {
 }
 
 func AddParticipant(participator participator) Watcher {
-	var member Member
+	var member *definition.Member
 
 	return func(ctx context.Context, state StateBody) error {
-		if state.Topic != Join {
+		if state.Topic != definition.Topic_Join {
 			return nil
 		}
 
@@ -28,10 +30,10 @@ func AddParticipant(participator participator) Watcher {
 }
 
 func RemoveParticipant(participator participator) Watcher {
-	var member Member
+	var member *definition.Member
 
 	return func(ctx context.Context, state StateBody) error {
-		if state.Topic != Busy {
+		if state.Topic != definition.Topic_Busy {
 			return nil
 		}
 

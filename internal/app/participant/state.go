@@ -2,26 +2,13 @@ package participant
 
 import (
 	"encoding/json"
-)
 
-const (
-	Call  Topic = "call"
-	Join  Topic = "join"
-	Busy  Topic = "busy"
-	Fault Topic = "fault"
+	"github.com/parinpan/romusha/definition"
 )
-
-const (
-	Available Status = "available"
-	Occupied  Status = "occupied"
-)
-
-type Topic string
-type Status string
 
 type StateBody struct {
-	Topic Topic  `json:"topic"`
-	Data  []byte `json:"data"`
+	Topic definition.Topic `json:"topic"`
+	Data  []byte           `json:"data"`
 }
 
 func (s StateBody) MarshalBinary() ([]byte, error) {

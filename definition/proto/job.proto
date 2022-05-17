@@ -6,7 +6,7 @@ package job;
 
 message Job {
   Type type = 1;
-  repeated string sources = 2;
+  string source = 2;
   bytes processor = 3;
 }
 
