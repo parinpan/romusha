@@ -52,7 +52,7 @@ func (a *Assignor) assign(ctx context.Context, member *definition.Member, envelo
 		return a.pushBack(ctx, envelope)
 	}
 
-	return nil
+	return a.participator.List(ctx).Remove(ctx, member)
 }
 
 func (a *Assignor) pushBack(ctx context.Context, envelope *definition.Envelope) error {
@@ -64,7 +64,7 @@ func firstPick(participants participant.List) *definition.Member {
 		return nil
 	}
 
-	for host, _ := range participants {
+	for host := range participants {
 		return &definition.Member{
 			Host: host,
 		}
