@@ -15,12 +15,12 @@ type queuer interface {
 	Push(ctx context.Context, jobID string, job []byte) error
 }
 
-type bridger interface {
-	Assign(ctx context.Context, envelope *definition.Envelope) (*definition.Response, error)
+type bridgeManager interface {
+	AssignByHost(ctx context.Context, host string, envelope *definition.Envelope) (resp *definition.Response, err error)
 }
 
 type Assignor struct {
-	bridger      bridger
+	bridger      bridgeManager
 	queuer       queuer
 	participator participator
 }
@@ -39,11 +39,11 @@ func (a *Assignor) Assign(ctx context.Context, jobID string, callbackEndpoint st
 		return a.pushBack(ctx, envelope)
 	}
 
-	return a.assign(ctx, envelope)
+	return a.assign(ctx, pickedMember, envelope)
 }
 
-func (a *Assignor) assign(ctx context.Context, envelope *definition.Envelope) error {
-	response, err := a.bridger.Assign(ctx, envelope)
+func (a *Assignor) assign(ctx context.Context, member *definition.Member, envelope *definition.Envelope) error {
+	response, err := a.bridger.AssignByHost(ctx, member.Host, envelope)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func firstPick(participants participant.List) *definition.Member {
 
 	for host, _ := range participants {
 		return &definition.Member{
-			Host: string(host),
+			Host: host,
 		}
 	}
 
