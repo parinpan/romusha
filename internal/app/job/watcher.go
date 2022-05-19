@@ -8,7 +8,7 @@ import (
 )
 
 type queuer interface {
-	Push(ctx context.Context, goBytes []byte) error
+	Push(ctx context.Context, jobEnvelope interface{}) error
 }
 
 func RequeueJob(queue queuer) participant.Watcher {

@@ -8,7 +8,7 @@ import (
 
 type StateBody struct {
 	Topic definition.Topic `json:"topic"`
-	Data  []byte           `json:"data"`
+	Data  interface{}      `json:"data"`
 }
 
 func (s StateBody) MarshalBinary() ([]byte, error) {

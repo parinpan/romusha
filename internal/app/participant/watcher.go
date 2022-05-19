@@ -2,7 +2,7 @@ package participant
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 
 	"github.com/parinpan/romusha/definition"
 )
@@ -15,30 +15,32 @@ type participator interface {
 
 func AddParticipant(participator participator) Watcher {
 	var member *definition.Member
+	var convertible bool
 
 	return func(ctx context.Context, state StateBody) error {
 		if state.Topic != definition.Topic_Join {
 			return nil
 		}
 
-		if err := json.Unmarshal(state.Data, &member); err != nil {
-			return err
+		if member, convertible = state.Data.(*definition.Member); !convertible {
+			return errors.New("data type is not convertible")
 		}
 
-		return participator.List(ctx).Add(ctx, member)
+		return participator.List(ctx).Add(ctx, member, definition.Status_Available)
 	}
 }
 
 func RemoveParticipant(participator participator) Watcher {
 	var member *definition.Member
+	var convertible bool
 
 	return func(ctx context.Context, state StateBody) error {
 		if state.Topic != definition.Topic_Busy {
 			return nil
 		}
 
-		if err := json.Unmarshal(state.Data, &member); err != nil {
-			return err
+		if member, convertible = state.Data.(*definition.Member); !convertible {
+			return errors.New("data type is not convertible")
 		}
 
 		return participator.List(ctx).Remove(ctx, member)

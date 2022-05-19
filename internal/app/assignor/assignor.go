@@ -9,10 +9,11 @@ import (
 
 type participator interface {
 	List(ctx context.Context) participant.List
+	Notify(ctx context.Context, state participant.StateBody) error
 }
 
-type queuer interface {
-	Push(ctx context.Context, jobEnvelope *definition.JobEnvelope) error
+type jobQueuer interface {
+	Push(ctx context.Context, jobEnvelope interface{}) error
 }
 
 type bridgeManager interface {
@@ -21,7 +22,7 @@ type bridgeManager interface {
 
 type Assignor struct {
 	bridger      bridgeManager
-	queuer       queuer
+	jobQueuer    jobQueuer
 	participator participator
 }
 
@@ -46,6 +47,8 @@ func (a *Assignor) Assign(ctx context.Context, jobID string, source, callbackUrl
 }
 
 func (a *Assignor) assign(ctx context.Context, member *definition.Member, envelope *definition.JobEnvelope) error {
+	defer a.participator.List(ctx).Add(ctx, member, definition.Status_Occupied)
+
 	response, err := a.bridger.AssignByHost(ctx, member.Host, envelope)
 	if err != nil {
 		return err
@@ -55,11 +58,11 @@ func (a *Assignor) assign(ctx context.Context, member *definition.Member, envelo
 		return a.pushBack(ctx, envelope)
 	}
 
-	return a.participator.List(ctx).Remove(ctx, member)
+	return nil
 }
 
 func (a *Assignor) pushBack(ctx context.Context, envelope *definition.JobEnvelope) error {
-	return a.queuer.Push(ctx, envelope)
+	return a.jobQueuer.Push(ctx, envelope)
 }
 
 func firstPick(participants participant.List) *definition.Member {

@@ -5,16 +5,20 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+
+	"github.com/parinpan/romusha/definition"
 )
 
 const (
 	queueKey = "job:queue"
+
+	nJobCount = 100
 )
 
-type QueueProcessor func(ctx context.Context, job []byte) error
+type QueueProcessor func(ctx context.Context, envelope *definition.JobEnvelope) error
 
 type queueClient interface {
-	LPop(ctx context.Context, key string) *redis.StringCmd
+	LPopCount(ctx context.Context, key string, count int) *redis.StringSliceCmd
 	RPush(ctx context.Context, key string, values ...interface{}) *redis.IntCmd
 }
 
@@ -30,19 +34,23 @@ func NewQueue(qc queueClient) *Queue {
 	}
 }
 
-func (q *Queue) Push(ctx context.Context, jobEnvelope []byte) error {
+func (q *Queue) Push(ctx context.Context, jobEnvelope interface{}) error {
 	return q.qc.RPush(ctx, q.key, jobEnvelope).Err()
 }
 
 func (q *Queue) Poll(ctx context.Context, timeout time.Duration, processor QueueProcessor) error {
+	var jobEnvelopes []*definition.JobEnvelope
+
 	for {
-		b, err := q.qc.LPop(ctx, q.key).Bytes()
+		err := q.qc.LPopCount(ctx, q.key, nJobCount).ScanSlice(&jobEnvelopes)
 		if err != nil && err != redis.Nil {
 			return err
 		}
 
-		if err := processor(ctx, b); err != nil {
-			return err
+		for _, envelope := range jobEnvelopes {
+			if err := processor(ctx, envelope); err != nil {
+				return err
+			}
 		}
 
 		time.Sleep(timeout)
