@@ -9,7 +9,7 @@ import (
 
 type participator interface {
 	List(ctx context.Context) participant.List
-	Notify(ctx context.Context, state participant.StateBody) error
+	Notify(ctx context.Context, state definition.StateBody) error
 }
 
 type jobQueuer interface {
@@ -24,6 +24,14 @@ type Assignor struct {
 	bridger      bridgeManager
 	jobQueuer    jobQueuer
 	participator participator
+}
+
+func NewAssignor(bridger bridgeManager, jobQueuer jobQueuer, participator participator) *Assignor {
+	return &Assignor{
+		bridger:      bridger,
+		jobQueuer:    jobQueuer,
+		participator: participator,
+	}
 }
 
 func (a *Assignor) Assign(ctx context.Context, jobID string, source, callbackUrl string, executor []byte) error {

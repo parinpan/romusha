@@ -1,14 +1,15 @@
-package participant
+package definition
 
 import (
+	"context"
 	"encoding/json"
-
-	"github.com/parinpan/romusha/definition"
 )
 
+type Watcher func(ctx context.Context, state StateBody) error
+
 type StateBody struct {
-	Topic definition.Topic `json:"topic"`
-	Data  interface{}      `json:"data"`
+	Topic Topic       `json:"topic"`
+	Data  interface{} `json:"data"`
 }
 
 func (s StateBody) MarshalBinary() ([]byte, error) {

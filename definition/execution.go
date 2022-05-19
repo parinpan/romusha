@@ -5,5 +5,5 @@ import (
 )
 
 type Executor interface {
-	Execute(ctx context.Context, source string)
+	Execute(ctx context.Context, source string) error
 }

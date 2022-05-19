@@ -3,8 +3,11 @@ package participant
 import (
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/go-redis/redis/v8"
+
+	"github.com/parinpan/romusha/definition"
 )
 
 const (
@@ -34,7 +37,7 @@ func NewParticipant(redis pubSubClient) *Participant {
 	}
 }
 
-func (p *Participant) Notify(ctx context.Context, state StateBody) error {
+func (p *Participant) Notify(ctx context.Context, state definition.StateBody) error {
 	return p.psc.Publish(ctx, stateChannel, state).Err()
 }
 
@@ -42,8 +45,8 @@ func (p *Participant) List(ctx context.Context) List {
 	return p.list.GetAll(ctx)
 }
 
-func (p *Participant) Watch(ctx context.Context, watchers ...Watcher) (err error) {
-	var data StateBody
+func (p *Participant) Watch(ctx context.Context, watchers ...definition.Watcher) (err error) {
+	var data definition.StateBody
 
 	for {
 		msg, err := p.ssc(ctx).ReceiveMessage(ctx)
@@ -60,9 +63,11 @@ func (p *Participant) Watch(ctx context.Context, watchers ...Watcher) (err error
 		}
 
 		for _, watcher := range watchers {
-			if err := watcher(ctx, data); err != nil {
-				continue
-			}
+			go func() {
+				if err := watcher(ctx, data); err != nil {
+					log.Println("watcher got an error: ", err.Error())
+				}
+			}()
 		}
 	}
 

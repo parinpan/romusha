@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BridgeClient interface {
-	Assign(ctx context.Context, in *Envelope, opts ...grpc.CallOption) (*Response, error)
+	Assign(ctx context.Context, in *JobEnvelope, opts ...grpc.CallOption) (*Response, error)
 }
 
 type bridgeClient struct {
@@ -34,7 +34,7 @@ func NewBridgeClient(cc grpc.ClientConnInterface) BridgeClient {
 	return &bridgeClient{cc}
 }
 
-func (c *bridgeClient) Assign(ctx context.Context, in *Envelope, opts ...grpc.CallOption) (*Response, error) {
+func (c *bridgeClient) Assign(ctx context.Context, in *JobEnvelope, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
 	err := c.cc.Invoke(ctx, "/bridge.Bridge/Assign", in, out, opts...)
 	if err != nil {
@@ -47,7 +47,7 @@ func (c *bridgeClient) Assign(ctx context.Context, in *Envelope, opts ...grpc.Ca
 // All implementations must embed UnimplementedBridgeServer
 // for forward compatibility
 type BridgeServer interface {
-	Assign(context.Context, *Envelope) (*Response, error)
+	Assign(context.Context, *JobEnvelope) (*Response, error)
 	mustEmbedUnimplementedBridgeServer()
 }
 
@@ -55,7 +55,7 @@ type BridgeServer interface {
 type UnimplementedBridgeServer struct {
 }
 
-func (UnimplementedBridgeServer) Assign(context.Context, *Envelope) (*Response, error) {
+func (UnimplementedBridgeServer) Assign(context.Context, *JobEnvelope) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Assign not implemented")
 }
 func (UnimplementedBridgeServer) mustEmbedUnimplementedBridgeServer() {}
@@ -72,7 +72,7 @@ func RegisterBridgeServer(s grpc.ServiceRegistrar, srv BridgeServer) {
 }
 
 func _Bridge_Assign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Envelope)
+	in := new(JobEnvelope)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func _Bridge_Assign_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/bridge.Bridge/Assign",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BridgeServer).Assign(ctx, req.(*Envelope))
+		return srv.(BridgeServer).Assign(ctx, req.(*JobEnvelope))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -11,12 +11,8 @@ var (
 	ErrNoBridger = errors.New("assignor has no bridger for member")
 )
 
-type bridger interface {
-	Assign(ctx context.Context, envelope *definition.JobEnvelope) (resp *definition.Response, err error)
-}
-
 type Manager struct {
-	bridger map[string]bridger
+	bridger map[string]definition.BridgeClient
 }
 
 func (m *Manager) AssignByHost(ctx context.Context, host string, envelope *definition.JobEnvelope) (resp *definition.Response, err error) {
@@ -28,7 +24,7 @@ func (m *Manager) AssignByHost(ctx context.Context, host string, envelope *defin
 	return bridger.Assign(ctx, envelope)
 }
 
-func (m *Manager) Add(host string, b bridger) {
+func (m *Manager) Add(host string, b definition.BridgeClient) {
 	m.bridger[host] = b
 }
 
@@ -36,7 +32,7 @@ func (m *Manager) Remove(host string) {
 	delete(m.bridger, host)
 }
 
-func (m *Manager) getBridger(host string) (bridger, error) {
+func (m *Manager) getBridger(host string) (definition.BridgeClient, error) {
 	if b, ok := m.bridger[host]; ok {
 		return b, nil
 	}
