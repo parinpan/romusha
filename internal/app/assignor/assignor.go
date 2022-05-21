@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/parinpan/romusha/definition"
+	"github.com/parinpan/romusha/internal/app/job"
 	"github.com/parinpan/romusha/internal/app/participant"
 )
 
@@ -20,16 +21,22 @@ type bridgeManager interface {
 	AssignByHost(ctx context.Context, host string, envelope *definition.JobEnvelope) (resp *definition.Response, err error)
 }
 
+type jobStatus interface {
+	Set(ctx context.Context, jobID string, status string) error
+}
+
 type Assignor struct {
 	bridger      bridgeManager
 	jobQueuer    jobQueuer
+	jobStatus    jobStatus
 	participator participator
 }
 
-func NewAssignor(bridger bridgeManager, jobQueuer jobQueuer, participator participator) *Assignor {
+func NewAssignor(bridger bridgeManager, jobQueuer jobQueuer, jobStatus jobStatus, participator participator) *Assignor {
 	return &Assignor{
 		bridger:      bridger,
 		jobQueuer:    jobQueuer,
+		jobStatus:    jobStatus,
 		participator: participator,
 	}
 }
@@ -54,19 +61,19 @@ func (a *Assignor) Assign(ctx context.Context, jobID string, source, callbackUrl
 	return a.assign(ctx, pickedMember, envelope)
 }
 
-func (a *Assignor) assign(ctx context.Context, member *definition.Member, envelope *definition.JobEnvelope) error {
+func (a *Assignor) assign(ctx context.Context, member *definition.Member, jobEnvelope *definition.JobEnvelope) error {
 	defer a.participator.List(ctx).Add(ctx, member, definition.Status_Occupied)
 
-	response, err := a.bridger.AssignByHost(ctx, member.Host, envelope)
+	response, err := a.bridger.AssignByHost(ctx, member.Host, jobEnvelope)
 	if err != nil {
 		return err
 	}
 
 	if response.Status != definition.BridgeStatus_Success {
-		return a.pushBack(ctx, envelope)
+		return a.pushBack(ctx, jobEnvelope)
 	}
 
-	return nil
+	return a.jobStatus.Set(ctx, jobEnvelope.GetID(), job.ProcessingStatus)
 }
 
 func (a *Assignor) pushBack(ctx context.Context, envelope *definition.JobEnvelope) error {

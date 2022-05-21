@@ -7,13 +7,24 @@ import (
 
 	"github.com/parinpan/romusha/definition"
 	"github.com/parinpan/romusha/internal/app/job"
-	"github.com/parinpan/romusha/internal/app/worker"
 )
+
+type jobTracker interface {
+	Track(ctx context.Context, envelope *definition.JobEnvelope, exec definition.Executor, status *definition.Status)
+}
 
 // Server is a grpc client for all workers only
 type Server struct {
-	tracker *worker.JobTracker
+	definition.UnimplementedBridgeServer
+	tracker jobTracker
 	status  definition.Status
+}
+
+func NewServer(jobTracker jobTracker) *Server {
+	return &Server{
+		tracker: jobTracker,
+		status:  definition.Status_Available,
+	}
 }
 
 func (s *Server) Assign(ctx context.Context, envelope *definition.JobEnvelope) (resp *definition.Response, err error) {
@@ -41,4 +52,8 @@ func (s *Server) Assign(ctx context.Context, envelope *definition.JobEnvelope) (
 	go s.tracker.Track(ctx, envelope, exec, &s.status)
 
 	return
+}
+
+func (s *Server) Status() definition.Status {
+	return s.status
 }

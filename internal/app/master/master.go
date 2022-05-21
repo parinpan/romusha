@@ -1,4 +1,4 @@
-package server
+package master
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	"github.com/parinpan/romusha/internal/app/bridge"
 	"github.com/parinpan/romusha/internal/app/job"
 	"github.com/parinpan/romusha/internal/app/participant"
+	"github.com/parinpan/romusha/internal/app/scheduler"
 )
 
 func Start(ctx context.Context) error {
@@ -26,7 +27,7 @@ func Start(ctx context.Context) error {
 
 	jobQ := job.NewQueue(rc)
 	jobStatus := job.NewStatus(rc, jobStatusTTL)
-	asg := assignor.NewAssignor(bm, jobQ, pcp)
+	asg := assignor.NewAssignor(bm, jobQ, jobStatus, pcp)
 
 	errChan := make(chan error, 1)
 	sigCapt := make(chan os.Signal, 1)
@@ -37,12 +38,23 @@ func Start(ctx context.Context) error {
 			ctx,
 			participant.AddParticipant(pcp, bm),
 			participant.RemoveParticipant(pcp),
-			job.RequeueJob(jobQ, jobStatus))
+			job.RequeueJob(jobQ, jobStatus),
+			jobStatusWatcher(jobStatus))
 	}()
 
 	go func() {
 		errChan <- jobQ.Poll(ctx, jobPollDelay, job.AssignJob(asg))
 	}()
+
+	go func() {
+		scheduler.Schedule(
+			ctx,
+			time.Duration(500)*time.Millisecond,
+			periodicCallToJoin(pcp))
+	}()
+
+	// ask all available workers to join
+	_ = callToJoin(ctx, pcp)
 
 	select {
 	case err := <-errChan:

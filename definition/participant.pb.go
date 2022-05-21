@@ -209,7 +209,7 @@ var file_definition_proto_participant_proto_enumTypes = make([]protoimpl.EnumInf
 var file_definition_proto_participant_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_definition_proto_participant_proto_goTypes = []interface{}{
 	(Topic)(0),     // 0: participant.Topic
-	(Status)(0),    // 1: participant.Status
+	(Status)(0),    // 1: participant.status
 	(*Member)(nil), // 2: participant.Member
 }
 var file_definition_proto_participant_proto_depIdxs = []int32{
